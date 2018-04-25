@@ -34,12 +34,17 @@ abstract class TSPSolver(
         return best!!
     }
 
-    fun solve(terminationCriteria: (IterationData) -> Boolean): Candidate {
+    fun solve(terminationCriteria: (IterationData) -> Boolean): Solution {
         val t0 = System.currentTimeMillis()
         val iterationData = IterationDataImpl()
-        var best: Candidate
+        var best: Candidate? = null
         do {
-            best = iteration()
+            val iteration = iteration()
+            if (best == null) {
+                best = iteration.copy()
+            } else if (best.cost > iteration.cost) {
+                best = iteration.copy()
+            }
             iterationData.apply {
                 bestCost = best.cost
                 numIterations += 1
@@ -47,7 +52,7 @@ abstract class TSPSolver(
             }
         } while (!terminationCriteria.invoke(iterationData))
 
-        return best
+        return Solution(best!!, iterationData)
 
     }
 

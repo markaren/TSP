@@ -17,17 +17,11 @@ class TSPProblem private constructor(
         @Suppress("NAME_SHADOWING")
         val candidate = if (useInverse) invToPerm(candidate) else candidate
 
-        var totalDistance = 0.0
-        var last = cities[candidate[0]-1]
-
-        for (i in 1 until candidate.size) {
-            val current = cities[candidate[i]-1]
-            totalDistance += current.distanceTo(last)
-            last = current
+        var dist = 0.0
+        candidate.map { cities[it-1] }.zipWithNext().forEach { (c1, c2) ->
+            dist += c1.distanceTo(c2)
         }
-
-        return totalDistance
-
+        return dist
     }
 
     fun evaluateCandidates(candidates: List<Candidate>) {

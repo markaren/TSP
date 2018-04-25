@@ -2,6 +2,7 @@ package laht.info.tsp
 
 import info.laht.tsp.TSPProblem
 import info.laht.tsp.ga.*
+import info.laht.tsp.invToPerm
 import org.junit.Test
 import java.io.File
 
@@ -13,8 +14,8 @@ class TestGA {
         val ga = GA(
                 popSize = problem.dimensionality * 2 ,
                 elitism = 0.1,
-                mutationRate = 0.5,
-                selectionRate = 0.8,
+                mutationRate = 0.1,
+                selectionRate = 0.5,
                 mutationOperator = SwapMutator(),
                 crossoverOperator = NPointCrossover(),
                 selectionOperator = StochasticUniversalSampling(),
@@ -22,9 +23,11 @@ class TestGA {
         )
 
         val solve = ga.solve{
-            it.timeSpent > 5000 || it.bestCost == optimum
+            it.timeSpent >= 5000 || it.bestCost == optimum
         }
-        println("Computed solution for '$fileName' is ${solve.cost}, known optimum is $optimum")
+        println(solve.iterationData.numIterations)
+        println("Computed solution for '$fileName' is ${solve.cost}, known optimum is $optimum. numIterations=${solve.iterationData.numIterations}, timeSpent=${solve.iterationData.timeSpent}")
+        println("candidate=${invToPerm(solve.candidate).toList()}")
 
     }
 

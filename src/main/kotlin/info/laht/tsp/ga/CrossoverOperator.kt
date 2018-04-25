@@ -8,38 +8,56 @@ interface CrossoverOperator {
     fun apply(parents: List<Candidate>, numOffspring: Int, rng: Random): List<Candidate>
 }
 
+
+/**
+ * adapted from https://github.com/dwdyer/watchmaker/blob/master/framework/src/java/main/org/uncommons/watchmaker/framework/operators/IntArrayCrossover.java
+ */
 class NPointCrossover(
         private val numberOfCrossoverPoints: Int? = null
 ): CrossoverOperator {
 
     override fun apply(parents: List<Candidate>, numOffspring: Int, rng: Random): List<Candidate> {
 
-        return mutableListOf<Candidate>().apply {
-            while (size < numOffspring) {
+        Collections.shuffle(parents, rng)
+        val offspring = ArrayList<Candidate>()
 
-                val i1 = rng.nextInt(parents.size)
-                var i2: Int
-                do {
-                    i2 = rng.nextInt(parents.size)
-                } while (i1 == i2)
+        var i = 0
+        while (i < numOffspring) {
 
-                val ma = parents[i1]
-                var pa = parents[i2]
-
-                mate(ma.candidate, pa.candidate, rng).also {
-                    add(it.first)
-                    add(it.second)
-                }
+            if (i + 1 >= parents.size) {
+                break
             }
+            val ma = parents[i].candidate
+            val pa = parents[i + 1].candidate
+            val mateTwo = mateTwo(ma, pa, rng)
 
-            if (size > numOffspring) {
-                removeAt(size-1)
-            }
+            offspring.add(mateTwo.first)
+            offspring.add(mateTwo.second)
+            i += 2
+        }
+
+        if (offspring.size < numOffspring) {
+
+            do {
+                val ma = parents[rng.nextInt(parents.size)].candidate
+                val pa = parents[rng.nextInt(parents.size)].candidate
+                val mateTwo = mateTwo(ma, pa, rng)
+
+                offspring.add(mateTwo.first)
+                offspring.add(mateTwo.second)
+
+            } while (offspring.size < numOffspring)
 
         }
+
+        while (offspring.size > numOffspring) {
+            offspring.removeAt(offspring.size - 1)
+        }
+
+        return offspring
     }
 
-    private fun mate(ma: IntArray, pa: IntArray, rng: Random): Pair<Candidate, Candidate> {
+    private fun mateTwo(ma: IntArray, pa: IntArray, rng: Random): Pair<Candidate, Candidate> {
 
         if (ma.size != pa.size) {
             throw IllegalArgumentException("ma.size != pa.size")

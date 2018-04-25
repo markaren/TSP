@@ -17,8 +17,8 @@ class Testperm {
 
         permutations.forEach { perm ->
             val inv = permToInv(perm.first)
-            Assert.assertEquals(perm.second, inv)
-            Assert.assertEquals(perm.first, invToPerm(inv))
+            Assert.assertArrayEquals(perm.second, inv)
+            Assert.assertArrayEquals(perm.first, invToPerm(inv))
         }
 
     }
@@ -28,9 +28,9 @@ class Testperm {
     fun test2() {
 
         val perm = (1 until 38).shuffled().toIntArray()
-        println(perm)
+        println(perm.toList())
         val inv = permToInv(perm)
-        Assert.assertEquals(perm, invToPerm(inv))
+        Assert.assertArrayEquals(perm, invToPerm(inv))
 
     }
 
