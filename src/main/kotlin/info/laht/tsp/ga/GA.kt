@@ -10,7 +10,7 @@ class GA(
         val elitism: Double,
         val selectionRate: Double,
         val mutationRate: Double,
-        val selectionOperator: SelectionOperator = RouletteWheelSelection(),
+        val selectionOperator: SelectionOperator,
         val mutationOperator: MutationOperator = SwapMutator(),
         val crossoverOperator: CrossoverOperator = NPointCrossover()
 ): TSPSolver(problem) {
@@ -19,9 +19,9 @@ class GA(
             = MutableList(popSize, {problem.generateCandidate()})
 
     private val rng = Random()
-    private val numElites = Math.round(elitism * popSize).toInt()
-    private val numToSelect = Math.round(popSize * selectionRate).toInt()
-    private val numMutations = Math.round((popSize - numElites).toDouble() * problem.dimensionality.toDouble() * this.mutationRate).toInt()
+    private val numElites: Int = Math.round(elitism * popSize).toInt()
+    private val numToSelect: Int = Math.round(popSize * selectionRate).toInt()
+    private val numMutations: Int = Math.round(((popSize - numElites) * problem.dimensionality).toDouble() * this.mutationRate).toInt()
 
     init {
         evaluateAndSortPopulation()
@@ -39,13 +39,13 @@ class GA(
         val numOffspring = popSize-numToSelect
         val offspring = crossoverOperator.apply(parentPool, numOffspring, rng)
 
-        population.subList(popSize-offspring.size, popSize).clear()
+        population.subList(popSize-offspring.size, popSize).clear() //make room for new offspring, by removing the worst candidates
         population.addAll(offspring)
 
-        mutationOperator.apply(population.subList(numElites, popSize), numMutations, rng)
+        mutationOperator.apply(population.subList(numElites, popSize), numMutations, rng) //elites are not to be mutated
 
         if (popSize != population.size) {
-            println("popsize=$popSize, actual=${population.size}")
+            throw IllegalStateException("popsize=$popSize, actual=${population.size}")
         }
 
         evaluateAndSortPopulation()

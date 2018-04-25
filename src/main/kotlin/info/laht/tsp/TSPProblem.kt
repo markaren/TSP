@@ -1,6 +1,7 @@
 package info.laht.tsp
 
 import java.io.File
+import java.net.URL
 
 class TSPProblem private constructor(
         private val cities: List<Vector2>
@@ -45,6 +46,10 @@ class TSPProblem private constructor(
 
         fun parse(file: File): TSPProblem {
             return parse(file.readText(Charsets.UTF_8).trim())
+        }
+
+        fun parse(url: URL): TSPProblem {
+            return parse(url.readText(Charsets.UTF_8).trim())
         }
 
         fun parse(text: String): TSPProblem {

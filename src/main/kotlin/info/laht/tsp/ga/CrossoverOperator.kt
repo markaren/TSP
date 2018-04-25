@@ -9,7 +9,7 @@ interface CrossoverOperator {
 }
 
 class NPointCrossover(
-        val numberOfCrossoverPoints: Int? = null
+        private val numberOfCrossoverPoints: Int? = null
 ): CrossoverOperator {
 
     override fun apply(parents: List<Candidate>, numOffspring: Int, rng: Random): List<Candidate> {
@@ -26,8 +26,9 @@ class NPointCrossover(
                 val ma = parents[i1]
                 var pa = parents[i2]
 
-                mate(ma.candidate, pa.candidate, rng).also { offspring ->
-                    addAll(offspring.map { Candidate(it) })
+                mate(ma.candidate, pa.candidate, rng).also {
+                    add(it.first)
+                    add(it.second)
                 }
             }
 
@@ -38,28 +39,30 @@ class NPointCrossover(
         }
     }
 
-    private fun mate(parent1: IntArray, parent2: IntArray, rng: Random): List<IntArray> {
+    private fun mate(ma: IntArray, pa: IntArray, rng: Random): Pair<Candidate, Candidate> {
 
-        if (parent1.size != parent2.size) throw IllegalArgumentException()
+        if (ma.size != pa.size) {
+            throw IllegalArgumentException("ma.size != pa.size")
+        }
 
-        val numberOfCrossoverPoints = numberOfCrossoverPoints ?: rng.nextInt(parent1.size-1) + 1
+        val numberOfCrossoverPoints = numberOfCrossoverPoints ?: rng.nextInt(ma.size-1) + 1
 
-        val offspring1 = IntArray(parent1.size)
-        System.arraycopy(parent1, 0, offspring1, 0, parent1.size)
-        val offspring2 = IntArray(parent2.size)
-        System.arraycopy(parent2, 0, offspring2, 0, parent2.size)
+        val offspring1 = IntArray(ma.size)
+        System.arraycopy(ma, 0, offspring1, 0, ma.size)
+        val offspring2 = IntArray(pa.size)
+        System.arraycopy(pa, 0, offspring2, 0, pa.size)
         // Apply as many cross-overs as required.
-        val temp = IntArray(parent1.size)
+        val temp = IntArray(ma.size)
         for (i in 0 until numberOfCrossoverPoints) {
             // Cross-over index is always greater than zero and less than
             // the length of the parent so that we always pick a point that
             // will result in a meaningful cross-over.
-            val crossoverIndex = 1 + rng.nextInt(parent1.size - 1)
+            val crossoverIndex = 1 + rng.nextInt(ma.size - 1)
             System.arraycopy(offspring1, 0, temp, 0, crossoverIndex)
             System.arraycopy(offspring2, 0, offspring1, 0, crossoverIndex)
             System.arraycopy(temp, 0, offspring2, 0, crossoverIndex)
         }
-        return listOf((offspring1), offspring2)
+        return Candidate(offspring1) to Candidate(offspring2)
     }
 
 }
